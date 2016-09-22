@@ -82,12 +82,43 @@ function newPrefeito(req, res){
 	});
 }
 
+function prefeitos(req, res){
+	pool.getConnection(function(err,connection){
+		if (err) {
+			connection.release();
+			res.json({"code" : 100, "status" : "Error in connection database"});
+			return;
+		} 
+
+		console.log('connected as id ' + connection.threadId);
+		console.log(cidade);
+		connection.query("SELECT * from wp_prefs;", function(err,rows){
+			connection.release();
+			if(!err) {
+				if(rows.length > 0){
+					res.json(rows);
+					return;
+				}
+				res.json({"error":"error desconhecido"});
+				return;
+			}       
+		});
+		connection.on('error', function(err) {      
+			res.json({"error": "Error in connection database"});
+			return;     
+		});
+	});
+}
+
 
 router.get('/:cidade', function(req, res){
 	getPrefeitos(req, res);
 });
 router.get('/new', function(req, res){
 	newPrefeito(req, res);
+});
+router.get('/prefeitos', function(req, res){
+	prefeitos(req, res);
 });
 
 
